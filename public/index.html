@@ -1,23 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-    <title>IMC Camera</title>
+    <meta charset="UTF-8">
+    <title>AI Body Scanner</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>IMC Camera</h1>
+<div class="container">
 
-<video id="video" autoplay width="400"></video>
+    <h1>AI Body Scanner</h1>
 
-<br>
+    <div class="camera-box">
+        <video id="video" autoplay></video>
+        <canvas id="canvas"></canvas>
+    </div>
 
-<button id="startCamera">Abrir Câmara</button>
-<button id="takePhoto">Tirar Foto</button>
+    <div class="buttons">
+        <button id="startCamera">Abrir Câmara</button>
+        <button id="takePhoto">Tirar Foto</button>
+    </div>
 
-<h2 id="resultado"></h2>
+    <div id="result" class="result">
+        Resultado vai aparecer aqui
+    </div>
+
+</div>
 
 <script src="script.js"></script>
 
 </body>
 </html>
-
