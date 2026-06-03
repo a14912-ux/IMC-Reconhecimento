@@ -1,71 +1,77 @@
-window.addEventListener("load", () => {
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const resultado = document.getElementById("resultado");
 
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+let imagem = null;
 
-    const startCamera = document.getElementById("startCamera");
-    const takePhoto = document.getElementById("takePhoto");
-    const result = document.getElementById("result");
+// webcam
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    video.srcObject = stream;
+  })
+  .catch(() => {
+    resultado.style.display = "block";
+    resultado.innerHTML = "Webcam não disponível";
+  });
 
-    let stream;
+// tirar foto
+document.getElementById("tirarFoto").addEventListener("click", () => {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0);
+  imagem = canvas.toDataURL("image/jpeg", 0.8);
+  resultado.style.display = "block";
+  resultado.innerHTML = "Foto tirada! Mete o peso e altura e clica em Analisar.";
+});
 
-    console.log("JS carregado ✔");
+// analisar
+document.getElementById("analisar").addEventListener("click", async () => {
+  const altura = parseFloat(document.getElementById("altura").value);
+  const peso = parseFloat(document.getElementById("peso").value);
 
-    // 📷 ABRIR CÂMARA
-    startCamera.addEventListener("click", async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-            await video.play();
+  if (!imagem) {
+    resultado.style.display = "block";
+    resultado.innerHTML = "Tira a foto primeiro!";
+    return;
+  }
 
-            console.log("Câmara ligada ✔");
-            result.innerHTML = "📷 Câmara ligada com sucesso";
+  if (isNaN(altura) || isNaN(peso) || altura <= 0 || peso <= 0) {
+    resultado.style.display = "block";
+    resultado.innerHTML = "Mete a altura em metros (ex: 1.75) e o peso em kg (ex: 70)!";
+    return;
+  }
 
-        } catch (err) {
-            console.error(err);
-            result.innerHTML = "❌ Erro ao abrir câmara";
-        }
+  resultado.style.display = "block";
+  resultado.innerHTML = "A analisar...";
+
+  try {
+    const res = await fetch("/analisar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: imagem, peso: peso, altura: altura })
     });
 
-    // 📸 TIRAR FOTO + RESULTADO
-    takePhoto.addEventListener("click", () => {
+    const data = await res.json();
 
-        console.log("Botão foto clicado ✔");
+    if (data.erro) {
+      resultado.innerHTML = "Erro: " + data.erro;
+      return;
+    }
 
-        if (!video.videoWidth) {
-            result.innerHTML = "⚠️ Liga a câmara primeiro";
-            return;
-        }
+    let emoji = "";
+    if (data.classificacao === "abaixo do peso") emoji = "⚠️";
+    else if (data.classificacao === "peso normal") emoji = "✅";
+    else if (data.classificacao === "excesso de peso") emoji = "⚠️";
+    else emoji = "🔴";
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+    resultado.innerHTML =
+      "👤 Idade estimada: " + data.idade + " anos<br>" +
+      "⚖️ IMC: " + data.imc + "<br>" +
+      emoji + " Classificação: " + data.classificacao + "<br><br>" +
+      "💡 Dica: " + data.dica;
 
-        ctx.drawImage(video, 0, 0);
-
-        const image = canvas.toDataURL("image/png");
-
-        console.log("Imagem capturada ✔");
-
-        // 🔥 RESULTADO SIMPLES (TESTE PRIMEIRO)
-        const fakeHeight = 1.72;
-        const fakeWeight = 70;
-        const bmi = (fakeWeight / (fakeHeight * fakeHeight)).toFixed(2);
-
-        let category = "";
-
-        if (bmi < 18.5) category = "Baixo peso";
-        else if (bmi < 25) category = "Normal";
-        else if (bmi < 30) category = "Excesso de peso";
-        else category = "Obesidade";
-
-        result.innerHTML = `
-            <h3>📊 Resultado</h3>
-            <p>📏 Altura: ${fakeHeight} m</p>
-            <p>⚖️ Peso: ${fakeWeight} kg</p>
-            <p>📉 IMC: ${bmi}</p>
-            <p>📌 Categoria: ${category}</p>
-        `;
-    });
-
+  } catch (err) {
+    resultado.innerHTML = "Erro ao ligar ao servidor";
+  }
 });

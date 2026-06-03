@@ -1,34 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Body Scanner</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisador IMC</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h2 { margin-bottom: 20px; color: #333; }
+    video {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      background: #000;
+    }
+    .inputs {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    input {
+      padding: 10px;
+      width: 140px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    button {
+      padding: 11px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      background: #4a90e2;
+      color: white;
+      margin: 5px;
+    }
+    button:hover { background: #357abd; }
+    #resultado {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 320px;
+      font-size: 16px;
+      line-height: 2;
+      color: #333;
+      margin-top: 15px;
+      display: none;
+    }
+    canvas { display: none; }
+  </style>
 </head>
-
 <body>
 
-<div class="container">
+  <h2>📊 Analisador IMC</h2>
 
-    <h1>AI Body Scanner</h1>
+  <video id="video" autoplay playsinline></video>
 
-    <div class="camera-box">
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
-    </div>
+  <br>
+  <button id="tirarFoto">📸 Tirar Foto</button>
 
-    <div class="buttons">
-        <button id="startCamera">Abrir Câmara</button>
-        <button id="takePhoto">Tirar Foto</button>
-    </div>
+  <div class="inputs">
+    <input type="number" id="altura" placeholder="Altura (ex: 1.75)" step="0.01">
+    <input type="number" id="peso" placeholder="Peso (ex: 70)" step="0.1">
+  </div>
 
-    <div id="result" class="result">
-        Resultado vai aparecer aqui
-    </div>
+  <button id="analisar">🔍 Analisar</button>
 
-</div>
+  <canvas id="canvas"></canvas>
+  <div id="resultado"></div>
 
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
